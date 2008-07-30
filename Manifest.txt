@@ -1,0 +1,11 @@
+History.txt
+Manifest.txt
+README.txt
+Rakefile
+lib/netslime.rb
+lib/netslime/dispatcher.rb
+lib/netslime/worker.rb
+lib/netslime/parser.rb
+test/files/urilist.txt
+test/helper.rb
+test/test_worker.rb
