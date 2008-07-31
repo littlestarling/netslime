@@ -6,6 +6,7 @@ module NetSlime
 
     def initialize
       @agent = WWW::Mechanize.new
+      @agent.user_agent = "NetSlime/0.0.1"
     end
 
     def crawl (uri)
@@ -15,29 +16,24 @@ module NetSlime
     def save(uri, path = nil)
       page = @agent.get(uri)
       name = get_file_name(uri)
-  #    path = Time.now.strftime("%Y%m%d") + name if path.nil?
       path = name if path.nil?
       page.save(path)
     end
-
-
 
     def body(uri)
       page_body = @agent.get(uri).body
     end
 
-  #wget形式でパスを生成する場合のメソッド群
+  #download files like using wget
     def get_path(uri)
-    # URLパターンを除去
       name = uri.gsub("http://", "")
       dir_list = name.split("/")
       return dir_list
     end
 
-  #filenameだけ拾う
     def get_file_name(uri)
       list = get_path(uri)
-      return list.pop
+      return list.pop.split("\?").first
     end
 
 
@@ -49,6 +45,7 @@ module NetSlime
       dirAry = get_path(uri)
       dirAry.pop #remove filename
       dirAry.each do |dir|
+        dir = format_uri(dir)
         tpath = dir + "/"
         path = path + tpath
   #      p "path:" + path
@@ -59,12 +56,17 @@ module NetSlime
       end
       path
     end
+    
+    #transform special characters: ";?:@&=+$!*()%#'" in uri to usable name to file-system
+    def format_uri(name)
+      name.gsub(/[;?:@&=\+$!*'\(\)%#']/, "_")
+    end
 
     def save_file(uri, path = nil)
       base_path = Dir.pwd
       page = @agent.get(uri)
-      name = get_file_name(uri)
-      path = if path.nil? then name else path + "/" + name end
+      name = format_uri(get_file_name(uri))
+      path = if path.nil? then name else path + name end
       page.save(base_path + "/" + path)
       path
     end
